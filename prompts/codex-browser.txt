@@ -1,0 +1,63 @@
+使用 Codex 桌面版的 Browser 控制已经登录的 Kimi Claw 页面，并在该页面的 Web Terminal 中辅助部署。若登录状态位于已授权的 Chrome 会话，可使用对应的 Chrome 入口。
+
+私有输入；使用前必须替换：
+ADMIN_USER=CHANGE_ME_ADMIN_USER
+NODE_NAME=CHANGE_ME_NODE_NAME
+
+ADMIN_USER 只允许安全的 Linux 用户名；NODE_NAME 只允许小写字母、数字和连字符。任何值缺失、为空、仍含 CHANGE_ME 或格式不安全时，立即停止，不改系统。
+
+目标：在前置条件满足时，把当前 Kimi Claw Linux 主机配置成仅通过 Tailscale SSH 管理的 VPS-like 节点。AI 只辅助服务器内部步骤；Tailscale 网页授权、Tailnet Policy、第二台设备 SSH、公网 TCP 22 负向测试和重启复测全部为 manual-required。
+
+一、入口与隐私
+1. 只使用当前已经登录的 Kimi Claw 页面及其 Web Terminal，并始终保留 Web Terminal 作为恢复入口。
+2. 如果没有已登录且可用的 Terminal，停止；不要索取账号密码，不要尝试绕过登录。
+3. 不读取、复制、输出或保存密码、验证码、Cookie、Token、授权 URL、SSH 密钥、IP、邮箱、设备 ID、Host Key 或 OpenClaw/Kimi 凭证。
+4. 允许一次性授权 URL 只在私有 Terminal 中出现一次；不得截图、转发、写文件或在最终摘要中复述。
+
+二、只读预检
+先执行只读检查并逐项报告 PASS/FAIL：
+- 当前是受支持的 Linux 及其架构；
+- 当前为 root，或 sudo -n true 成功；
+- PID 1 为 systemd，且 systemctl 可用；
+- /dev/net/tun 可用；
+- 能通过 HTTPS 访问 Tailscale 官方安装源；
+- tailscaled、传统 OpenSSH 和潜在冲突服务的当前状态；
+- Kimi Web Terminal 仍可作为恢复入口。
+
+root/免密 sudo、systemd、TUN 或出站 HTTPS 任一项不满足时立即停止。不要改用 userspace networking，不要开放公网端口，不要做猜测性修复。
+
+预检通过后，列出拟执行修改、明确不会修改的项目、风险和回滚方法，然后暂停。只有我明确回复“确认部署”后才继续。
+
+三、服务器内部署
+1. 只使用与实际发行版匹配的 Tailscale 官方安装方法。
+2. 创建或复用 ADMIN_USER 指定的非 root 管理用户。若用户已存在，不修改其密码或权限，并验证该用户 sudo -n true。若需新建用户或 NOPASSWD sudoers 片段，先展示最小变更并取得确认；sudoers 临时文件必须先通过 visudo -cf，再原子安装。
+3. 启用并启动 tailscaled，并分别核验 active 与 enabled。
+4. 使用 NODE_NAME 运行 tailscale up，固定 --accept-dns=false --accept-routes=false。
+5. 出现一次性授权 URL 后立即暂停，由我本人在自己的浏览器完成授权。不要替我登录或点击确认。
+6. 授权完成且节点 Online 后，执行 tailscale set --ssh，并核对 Tailscale SSH 已启用。
+7. 不安装、修改或关闭传统 OpenSSH；不修改防火墙、云入口规则、系统 DNS 或默认路由；不配置 Funnel、Serve、Exit Node 或子网路由。
+8. 不使用 StrictHostKeyChecking=no，不执行 tailscale up --force-reauth。
+9. 若需要 Tailnet Policy，只生成最小、脱敏的待合并差异并暂停。未经本人预览、确认，不得提交或覆盖现有 Policy。
+
+四、验证边界
+服务器内部只允许验证：
+- tailscaled active/enabled；
+- 节点 Online；
+- Tailscale SSH 已启用；
+- OpenSSH 状态保持不变。
+
+以下项目必须标记 manual-required，不得根据服务器内部结果推断成功：
+- TAILSCALE_WEB_AUTH；
+- TAILNET_POLICY；
+- CLIENT_SSH_TEST；
+- PUBLIC_TCP22_TEST；
+- REBOOT_TEST；
+- DEVICE_KEY_EXPIRY。
+
+指导我从第二台已加入同一 Tailnet 的设备执行 ping 和真实 SSH 登录，但不要替我伪造结果。公网 TCP 22 必须从未连接 Tailscale 的外部网络负向测试，并同时核对平台入口规则。
+
+五、重启
+未收到我明确回复“确认重启测试”前不得重启。批准前必须确认 Web Terminal 可用、重要文件已备份、第二台设备已经完成一次真实 SSH 登录。重启后仍需由我从第二台设备重新登录，不能只检查服务器内部服务状态。
+
+六、最终报告
+输出脱敏 PASS/FAIL/manual-required 表，区分 server-side-ready 与 end-to-end-verified。报告可以在当前私人任务中显示 ADMIN_USER 和 NODE_NAME 以便连接，但不得包含任何 IP、邮箱、授权 URL、Cookie、Token、密码、密钥、指纹或原始日志。不得建议把私人报告原样复制到公开仓库或帖子。
