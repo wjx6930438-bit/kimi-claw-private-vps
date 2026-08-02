@@ -1,0 +1,62 @@
+你正在 Kimi Claw 提供的 Linux Terminal 内，以 Claude Code 交互会话运行。本 Prompt 的可靠主路径是逐项审阅并批准修改；不要使用 --dangerously-skip-permissions，也不要把非交互 Auto 当成必然成功的部署方式。
+
+从当前进程环境读取 ADMIN_USER 和 NODE_NAME。两项缺失、为空、仍含 CHANGE_ME，或不符合安全格式时，立即停止且不改系统。ADMIN_USER 只允许安全的 Linux 用户名；NODE_NAME 只允许小写字母、数字和连字符。
+
+目标：在前置条件满足时，辅助完成 Kimi Claw 主机内部的 Tailscale SSH 配置。Tailscale 网页授权、Tailnet Policy、第二台设备真实 SSH、公网 TCP 22 负向测试和重启复测均为 manual-required；不得把 server-side-ready 写成完整验收成功。
+
+隐私要求：
+- 不询问、读取、生成、回显或保存密码、验证码、Tailscale Auth Key、Cookie、SSH 私钥、公钥正文、IP、邮箱、设备 ID、Host Key、OpenClaw/Kimi token 或 credentials。
+- 授权 URL 只允许在当前私有 Terminal 中出现，不写文件、不加入最终摘要。
+- 不输出 ADMIN_USER、NODE_NAME 的实际值；最终只输出枚举状态。
+
+阶段一：只读预检
+1. 验证 ADMIN_USER 和 NODE_NAME 格式。
+2. 确认当前为 root，或 sudo -n true 成功；不得触发密码提示。
+3. 确认是受支持的 Linux，PID 1 为 systemd，systemctl 可用。
+4. 确认 /dev/net/tun 可用。
+5. 确认能通过 HTTPS 访问 Tailscale 官方安装源。
+6. 记录 tailscaled 和传统 OpenSSH 当前状态；不得改变 OpenSSH 状态。
+7. 确认 Kimi Web Terminal 仍可作为恢复入口。
+
+root/免密 sudo、systemd、TUN 或出站 HTTPS 任一项失败时，报告失败并停止。不要改用 userspace networking，不要开放公网端口，不要关闭安全校验。
+
+阶段二：提出变更并等待批准
+预检通过后，先列出拟执行命令、文件变更、不会修改的项目、风险和回滚方法。使用 Claude Code 的正常交互批准机制逐项取得许可后才执行。不得自行扩大权限。
+
+阶段三：最小服务器内变更
+1. 创建或复用 ADMIN_USER 指定的非 root 管理用户。
+2. 若用户已存在，不修改其密码或权限，只验证以该用户执行 sudo -n true；失败则 ADMIN_SUDO=unavailable，整体状态 incomplete。
+3. 若用户不存在，先请求批准；使用非交互方式创建 home 和登录 shell并锁定本地密码。独立 NOPASSWD sudoers 片段必须先对临时文件执行 visudo -cf，通过后才原子安装，并以该用户验证 sudo -n true。失败时撤销本次用户和片段。
+4. 按实际发行版使用 Tailscale 官方 Linux 安装方法，不把某一 Ubuntu/Debian 软件源硬套到其他系统。
+5. enable --now tailscaled，并分别验证 active 和 enabled。
+6. 若节点未加入 Tailnet，运行 tailscale up，hostname 使用 NODE_NAME，并固定 --accept-dns=false --accept-routes=false。
+7. 出现一次性授权 URL 后输出 AUTH_REQUIRED 并暂停，由用户本人在自己的浏览器完成授权。不要打开、截图、保存或在摘要中复述该 URL。
+8. 授权完成并确认节点 Running 后，执行 tailscale set --ssh。
+9. 不安装或修改 openssh-server，不修改防火墙、云入口规则、Tailnet Policy、系统 DNS 或默认路由，不配置 Funnel、Serve、Exit Node 或子网路由。
+10. 不使用 StrictHostKeyChecking=no，不执行 tailscale up --force-reauth。
+
+阶段四：服务器端验证
+只验证 tailscaled active/enabled、节点 Online、Tailscale SSH 已启用，以及传统 OpenSSH 状态未被改变。服务器内部不能证明 Tailnet Policy、第二台设备登录、公网 TCP 22、Key Expiry 或重启持久性。
+
+未经用户明确批准不得重启。即使批准重启，仍必须先确认 Kimi Web Terminal 可用、重要文件已备份、第二台设备已完成首次真实 SSH；重启后的第二台设备登录仍由用户本人执行。
+
+最终只输出：
+
+KIMI_PRIVATE_VPS_CLAUDE_RESULT
+PREFLIGHT=passed/failed
+PRIVILEGE=root/nopasswd-sudo/unavailable
+TUN=ready/unavailable
+ADMIN_USER=created/existing/failed
+ADMIN_SUDO=ready/unavailable/failed
+TAILSCALED=active/failed
+TAILSCALE_AUTH=online/auth-required/failed
+TAILSCALE_SSH=enabled/failed
+OPENSSH_STATE=absent/present-unchanged
+TAILNET_POLICY=manual-required
+DEVICE_KEY_EXPIRY=manual-required
+CLIENT_SSH_TEST=manual-required
+PUBLIC_TCP22_TEST=manual-required/not-applicable
+REBOOT_TEST=manual-required
+OVERALL=server-side-ready/incomplete
+
+不得输出任何地址、真实用户名、节点名、授权 URL、指纹、凭证或密钥材料。
