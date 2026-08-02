@@ -1,0 +1,25 @@
+{
+  // Minimal complete example for a new, personal Tailnet.
+  // It is NOT a patch. Do not overwrite an existing policy with this file.
+  // Back up, merge, preview, test, and only then save.
+  // The destination node must be owned by the connecting user and must not be shared.
+  // If the Linux user is not "kimiadmin", replace that quoted string in a private copy.
+
+  "grants": [
+    {
+      "src": ["autogroup:member"],
+      "dst": ["autogroup:self"],
+      "ip": ["tcp:22"],
+    },
+  ],
+
+  "ssh": [
+    {
+      "action": "check",
+      "src": ["autogroup:member"],
+      "dst": ["autogroup:self"],
+      "users": ["kimiadmin"],
+      "checkPeriod": "1h",
+    },
+  ],
+}
