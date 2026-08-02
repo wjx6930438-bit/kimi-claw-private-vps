@@ -1,0 +1,45 @@
+KIMI_CLAW_PRIVATE_VPS_ACCEPTANCE
+
+# Allowed values:
+# yes | no | not-run | not-applicable | manual-required
+#
+# Do not record real IPs, device names, hostnames, usernames, emails,
+# authorization URLs, keys, fingerprints, cookies, tokens, or raw logs here.
+# Never change a manual-required item to yes without performing that test.
+
+GUIDE_REVIEW_DATE=not-run
+
+OS_SUPPORTED=no
+ARCH_SUPPORTED=no
+ROOT_OR_PASSWORDLESS_SUDO=no
+SYSTEMD_PID1_AND_SYSTEMCTL=no
+TUN_DEVICE_AVAILABLE=no
+OFFICIAL_SOURCE_HTTPS=no
+PRECHECK_RESULT=no
+
+OPENSSH_STATE_REVIEWED=no
+OPENSSH_STATE_UNCHANGED=no
+LOCAL_TCP22_LISTENER_REVIEWED=no
+
+ADMIN_USER_EXISTS=no
+TAILSCALE_INSTALLED=no
+TAILSCALED_ACTIVE=no
+TAILSCALED_ENABLED=no
+TAILSCALE_SSH_REQUESTED=no
+
+TAILNET_DEVICE_AUTH=manual-required
+TAILNET_POLICY=manual-required
+DEVICE_KEY_EXPIRY=manual-required
+CLIENT_SSH_TEST=manual-required
+PUBLIC_IPV4_TCP22_TEST=manual-required
+PUBLIC_IPV6_TCP22_TEST=manual-required
+ONLY_TAILSCALE_CONFIRMED=manual-required
+REBOOT_TEST=manual-required
+FILES_PRESENT_AFTER_REBOOT=manual-required
+KIMI_OPENCLAW_AFTER_REBOOT=manual-required
+
+RECOVERY_ENTRY_VERIFIED=no
+IMPORTANT_FILES_BACKED_UP=no
+PRIVACY_SCAN_PASSED=no
+
+FINAL_STATUS=not-ready
