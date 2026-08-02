@@ -1,0 +1,44 @@
+# Local variables and environment files
+.env
+.env.*
+!.env.example
+variables.local.env
+
+# Private acceptance evidence
+private-evidence/
+evidence-private/
+acceptance-report.local.txt
+screenshots/raw/
+
+# Credentials, keys, identities, and state
+.ssh/
+.kimi/
+.openclaw/
+*.pem
+*.key
+*.pub
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+authorized_keys
+known_hosts
+tailscaled.state
+*.state
+
+# Raw logs, databases, backups, and archives
+*.log
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.bak
+*.backup
+*.zip
+*.7z
+*.tar
+*.tar.gz
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db
